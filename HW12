@@ -1,0 +1,8 @@
+per_cent = {'ТКБ': 5.6, 'СКБ': 5.9, 'ВТБ': 4.28, 'СБЕР': 4.0}
+cent_list = list(per_cent.values())
+deposit = []
+money = int(input("Введите желаемое количество денег для депозита:"))
+  for i in cent_list:
+   deposit.append(i*money/100)
+print("ТКБ:", deposit[0], "СКБ:", deposit[1], "ВТБ:", deposit[2], "СБЕР:", deposit[3])
+print( "Максимальная возможная сумма заработка: ", max(deposit))
