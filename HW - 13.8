@@ -1,0 +1,30 @@
+try:
+    try:
+        n = int(input('Введите число посетителей: '))
+    except ValueError as e:
+        print(e)
+    else:
+        while n <= 0:
+            print('Число посетителей не может быть <= 0 \n')
+            n = int(input('Введите число посетителей: '))
+        S = 0
+        for i in range(1, n + 1):
+            try:
+                age = int(input(f'Введите возраст посетителя {i} : '))
+            except ValueError as e:
+                print(e)
+            else:
+                while age <= 0:
+                    print('Возраст посетителя не может быть <= 0 \n')
+                    age = int(input(f'Введите возраст посетителя {i} : '))
+                if age < 18:
+                    S += 0
+                elif age < 25:
+                    S += 990
+                else:
+                    S += 1390
+        if n >= 3:
+            S *= 0.9
+            print('Итоговая сумма к оплате: ', S)
+finally:
+    print('------- \n')
