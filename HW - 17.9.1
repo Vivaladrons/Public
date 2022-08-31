@@ -1,0 +1,51 @@
+def qsort(array, left, right):
+    middle = (left + right) // 2
+    p = array[middle]
+    i, j = (left, right)
+    while i <= j:
+        while array[i] < p:
+            i += 1
+        while array[j] > p:
+            j -= 1
+        if i <= j:
+            array[i], array[j] = array[j], array[i]
+            i += 1
+            j -= 1
+
+    if j > left:
+        qsort(array, left, j)
+    if right > i:
+        qsort(array, i, right)
+
+
+def binary_search(array, element, left, right):
+    if left > right:
+        return (right + left) // 2
+    middle = (right + left) // 2
+    if array[middle] < element <= array[middle + 1]:
+        return middle
+    elif element < array[middle]:
+        return binary_search(array, element, left, middle - 1)
+    else:
+        return binary_search(array, element, middle + 1, right)
+
+
+try:
+    seq_list = list(map(int, input('Введите последовательность чисел через пробел: ').split()))
+    n = int(input('Введите любое произвольное число: '))
+except ValueError as e:
+    print(e)
+else:
+    while n:
+        if n <= min(seq_list):
+            print('Поиск невозможен. Введите число больше минимального: ')
+            n = int(input())
+        elif n >= max(seq_list):
+            print('Поиск невозможен. Введите число меньше максимального: ')
+            n = int(input())
+        else:
+            break
+
+    qsort(seq_list, 0, len(seq_list) - 1)
+    print(seq_list)
+    print('Число меньше искомого находится под номером :', binary_search(seq_list, n, 0, len(seq_list) - 1))
