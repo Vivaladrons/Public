@@ -1,0 +1,106 @@
+import pytest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+
+from config import email, password
+
+
+@pytest.fixture(autouse=True)
+def testing():
+    pytest_driver = webdriver.Chrome('./chromedriver.exe')
+    # Переходим на страницу авторизации
+    pytest_driver.get('http://petfriends.skillfactory.ru/login')
+    # Вводим email
+    pytest_driver.find_element(By.ID, 'email').send_keys(email)
+    # Вводим пароль
+    pytest_driver.find_element(By.ID, 'pass').send_keys(password)
+    # Нажимаем на кнопку входа в аккаунт
+    pytest_driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]').click()
+    pytest_driver.find_element(By.LINK_TEXT, 'Мои питомцы').click()
+
+    yield pytest_driver
+
+    pytest_driver.quit()
+
+
+def test_my_pets_exist(testing):
+    pytest_driver = testing
+    pets = pytest_driver.find_elements(By.CSS_SELECTOR, 'tbody tr ')
+    WebDriverWait(pytest_driver, 10).until(
+        EC.visibility_of_element_located((By.LINK_TEXT, 'PetFriends')))
+    # Есть ли все питомцы
+    WebDriverWait(pytest_driver, 10).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, '.btn-outline-secondary')))
+    count_pets = int(
+        pytest_driver.find_element(By.CSS_SELECTOR, 'html>body>div>div>div').text.split("\n")[1].split(":")[1].strip())
+    assert len(pets) == count_pets
+
+
+def test_half_images(testing):
+    pytest_driver = testing
+    images = pytest_driver.find_elements(By.TAG_NAME, 'img')
+    # Половина с именем
+    n = 0
+    count_pets = int(
+        pytest_driver.find_element(By.CSS_SELECTOR, 'html>body>div>div>div').text.split("\n")[1].split(":")[1].strip())
+    for i in range(len(images)):
+        if images[i].get_attribute('src') != '':
+            n += 1
+    assert n >= (count_pets + 1) / 2
+
+
+def test_all_pets_have_everything(testing):
+    pytest_driver = testing
+    pytest_driver.implicitly_wait(5)
+    images = pytest_driver.find_elements(By.TAG_NAME, 'img')
+    pytest_driver.implicitly_wait(5)
+    names = pytest_driver.find_elements(By.XPATH, '//td[1]')
+    pytest_driver.implicitly_wait(5)
+    breed = pytest_driver.find_elements(By.XPATH, '//td[2]')
+    pytest_driver.implicitly_wait(5)
+    years = pytest_driver.find_elements(By.XPATH, '//td[3]')
+    # У всех питомцев все есть
+    for i in range(len(names)):
+        n = images[i].get_attribute('src')
+        assert images[i].get_attribute('src') != ''
+        assert names[i].text != ''
+        assert breed[i].text != ''
+        assert years[i].text != ''
+
+
+def test_unique_names(testing):
+    pytest_driver = testing
+    names = pytest_driver.find_elements(By.XPATH, '//td[1]')
+    # Уникальные имена
+    for i in range(len(names)):
+        for j in range(i + 1, len(names)):
+            assert names[i].text != names[j].text
+
+
+def test_unique_pets(testing):
+    pytest_driver = testing
+    #Питомцы уникальны
+    flag_names = True
+    names = pytest_driver.find_elements(By.XPATH, '//td[1]')
+    for i in range(len(names)):
+        for j in range(i + 1, len(names)):
+            if names[i].text == names[j].text:
+                flag_names = False
+
+    flag_breed = True
+    breed = pytest_driver.find_elements(By.XPATH, '//td[2]')
+    for i in range(len(breed)):
+        for j in range(i + 1, len(breed)):
+            if breed[i].text == breed[j].text:
+                flag_breed = False
+
+    flag_years = True
+    years = pytest_driver.find_elements(By.XPATH, '//td[3]')
+    for i in range(len(years)):
+        for j in range(i + 1, len(years)):
+            if years[i].text == years[j].text:
+                flag_years = False
+
+    assert flag_names and flag_breed and flag_years
